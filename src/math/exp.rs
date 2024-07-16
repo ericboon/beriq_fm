@@ -28,7 +28,7 @@ pub fn exp_q16(w: i32) -> i32 {
 }
 
 // return exp2(w/65536)
-pub fn exp_from_table(w : i32) -> i32 {
+fn exp_from_table(w : i32) -> i32 {
     let idx : usize = (((w >> EXP_TABLE_SHIFT) & EXP_TABLE_MASK) as u16).into();
     let div : i32 = w & FRAC_MASK; 
 
