@@ -1,3 +1,5 @@
+use super::*;
+
 const EXP_TABLE_BITS : i32 = 10;
 const EXP_TABLE_LEN  : i32 = 1 << EXP_TABLE_BITS;
 const EXP_TABLE_MASK : i32 = EXP_TABLE_LEN - 1;
@@ -7,37 +9,28 @@ const FRAC_BITS : i32 = EXP_TABLE_SHIFT;
 const FRAC_LEN  : i32 = 1 << FRAC_BITS;
 const FRAC_MASK : i32 = FRAC_LEN - 1;
 
-const Q_INT_BITS : i32 = 16;
-const Q_FRAC_BITS : i32 = 32 - Q_INT_BITS;
-const Q_FRAC_MASK : i32 = (1 << Q_FRAC_BITS) - 1;
-const Q_ONE : i32 = 0x0001_0000;
-
-/// calculate exp2(w), where w is 16.16 fixpoint
-/// but only 16-bit precision and upto 32768 (2^15)
-pub fn exp_q16(w: i32) -> i32 {
-    let int  : i32 = w >> Q_FRAC_BITS;
-    let frac : i32 = w & Q_FRAC_MASK;
-    //println!("exp w={w:#08X} / {int}.{frac}");
-    let result : i32 = exp_from_table(frac) + Q_ONE;
-
-    if int > 0 {
-        result << int
-    } else {
-        result >> -int
+impl FP {
+    pub fn exp(log : FP) -> FP {
+        // println!("exp {:x} {:x}", log.int(), log.fraq());
+        if log > FP_ZERO {
+            (exp_from_table(log.frac()) + FP_ONE) << (log.int() as usize)
+        } else {
+            (exp_from_table(log.frac()) + FP_ONE) >> (-log.int() as usize)
+        }
     }
 }
 
-// return exp2(w/65536)
-fn exp_from_table(w : i32) -> i32 {
-    let idx : usize = (((w >> EXP_TABLE_SHIFT) & EXP_TABLE_MASK) as u16).into();
-    let div : i32 = w & FRAC_MASK; 
+/// return exp2(w/65536)
+fn exp_from_table(w : FP) -> FP {
+    let idx : usize = (((w.repr >> EXP_TABLE_SHIFT) & EXP_TABLE_MASK) as u16).into();
+    let div : i32 = w.repr & FRAC_MASK; 
 
     /* get values from table */
     let bot : i32 = EXP_TABLE[idx ] as i32;
     let top : i32 = EXP_TABLE[idx + 1] as i32;
 
     /* interpolate and return */
-    (bot * (FRAC_LEN - div) + top * div) >> FRAC_BITS
+    FP { repr : (bot * (FRAC_LEN - div) + top * div) >> FRAC_BITS }
 }
 
 const EXP_TABLE: [u16; (EXP_TABLE_LEN + 1) as usize] = [

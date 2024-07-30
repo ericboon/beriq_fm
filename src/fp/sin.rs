@@ -1,3 +1,5 @@
+use super::*;
+
 /* w = [0..1> phase in Q0.16bit format (w = 1 ~ 2*pi)
  *     0b qqtt_tttt_tttt_iiii
  *     q = quadrant
@@ -20,16 +22,18 @@ const TABLE_SHIFT : i32 = FRAC_BITS;
 ///     are considered, reflecting a phase in range [0..0.25>
 ///
 /// return value is [0..1> in 16.16 fixpoint
-pub fn sin_from_table(w : i32) -> i32 {
-    let idx : usize = (((w >> TABLE_SHIFT) & TABLE_MASK) as u16).into();
-	let div : i32 = w & FRAC_MASK; 
+impl FP {
+	pub fn sinw(w : FP) -> FP {
+	    let idx : usize = (((w.repr >> TABLE_SHIFT) & TABLE_MASK) as u16).into();
+		let div : i32 = w.repr & FRAC_MASK; 
 
-	/* get values from table */
-	let bot : i32 = SIN_TABLE[idx ] as i32;
-	let top : i32 = SIN_TABLE[idx + 1] as i32;
+		/* get values from table */
+		let bot : i32 = SIN_TABLE[idx ] as i32;
+		let top : i32 = SIN_TABLE[idx + 1] as i32;
 
-	/* interpolate and return */
-	(bot * (FRAC_LEN - div) + top * div) >> FRAC_BITS
+		/* interpolate and return */
+		FP::raw((bot * (FRAC_LEN - div) + top * div) >> FRAC_BITS)
+	}
 }
 
 const SIN_TABLE: [u16; (TABLE_LEN + 1) as usize] = [
