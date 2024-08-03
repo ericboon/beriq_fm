@@ -8,10 +8,12 @@ use crate::fp::*;
 
 use super::phase_generator::*;
 use super::wave_generator::*;
+use super::env_generator::*;
 
 pub struct Operator {
     pub phase_gen : PhaseGenerator,
     pub wave_gen  : WaveGenerator,
+    pub env_gen : EnvGenerator,
 
     pub total_level : u8,
     pub feedback_level : u8,
@@ -25,6 +27,7 @@ impl Operator {
         Operator {
             phase_gen : PhaseGenerator::new(),
             wave_gen  : WaveGenerator::new(),
+            env_gen   : EnvGenerator::new(),
 
             total_level : 255,
             feedback_level : 0,
@@ -35,10 +38,18 @@ impl Operator {
     }
 
     pub fn get_sample(&mut self) -> FP {
-        let phase = self.phase_gen.update(self.mod_input + self.feedback);
-        let output = self.wave_gen.generate(phase);
+        let phase       = self.phase_gen.update(self.mod_input + self.feedback);
+        let wave_sample = self.wave_gen.generate(phase);
+        let env_level   = self.env_gen.get_sample();
+
+        let output = 
+            if env_level == FP_ZERO || self.total_level == 0 {
+                FP_ZERO
+            } else {
+                wave_sample * env_level * FP::from(self.total_level) >> 8
+            };
+
         self.feedback = output * FP::from(self.feedback_level) >> 8;
-        let output = output * FP::from(self.total_level) >> 8;
 
         return output;
     }

@@ -94,24 +94,43 @@ impl ops::Mul<FP> for FP {
     }
 }
 
-impl std::ops::Shl<usize> for FP {
+impl ops::Shl<usize> for FP {
     type Output = Self;
     fn shl(self, rhs : usize) -> Self {
         FP { repr: self.repr << rhs }
     }
 }
 
-impl std::ops::Shr<usize> for FP {
+impl ops::Shr<usize> for FP {
     type Output = Self;
     fn shr(self, rhs : usize) -> Self {
         FP { repr: self.repr >> rhs }
     }
 }
 
-impl std::ops::BitAnd<i32> for FP {
+impl ops::BitAnd<i32> for FP {
     type Output = Self;
     fn bitand(self, rhs : i32) -> Self {
         FP { repr: self.repr & rhs }
+    }
+}
+
+impl ops::AddAssign<FP> for FP {
+    fn add_assign(&mut self, rhs: FP) {
+        self.repr += rhs.repr;
+    }
+}
+
+impl ops::SubAssign<FP> for FP {
+    fn sub_assign(&mut self, rhs: FP) {
+        self.repr -= rhs.repr;
+    }
+}
+
+impl ops::MulAssign<FP> for FP {
+    fn mul_assign(&mut self, rhs: FP) {
+        let result64 : i64 = self.repr as i64 * rhs.repr as i64;
+        self.repr = (result64 >> 16) as i32;
     }
 }
 

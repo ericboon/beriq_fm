@@ -6,5 +6,6 @@ const LOG2_SF : FP = FP { repr : 0xF_8CFE }; // 15.55075 as FP
 
 pub mod phase_generator;
 pub mod wave_generator;
+pub mod env_generator;
 pub mod operator;
 pub mod voice; 
