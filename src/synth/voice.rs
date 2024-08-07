@@ -10,7 +10,7 @@ pub struct Voice {
     pub operators : [ Operator; 4 ],
     pub algorithm : usize,
     output : FP,
-    adder : FP
+    adder : FP,
 }
 
 impl Voice {
@@ -24,7 +24,7 @@ impl Voice {
             ],
             algorithm : 0,
             output : FP_ZERO,
-            adder : FP_ZERO
+            adder : FP_ZERO,
         }
     }
 
@@ -49,6 +49,7 @@ impl Voice {
                 Register::Null => ()
             };
         }
+
         // Output sink of last op is final output
         return 
             match algo[3].out_sink {
@@ -61,6 +62,19 @@ impl Voice {
     pub fn set_freq(&mut self, flog2 : FP) {
         for op in &mut self.operators {
             op.phase_gen.flog2 = flog2;
+        }
+    }
+
+    pub fn note_on(&mut self, flog2 : FP) {
+        for op in &mut self.operators {
+            op.phase_gen.flog2 = flog2;
+            op.env_gen.open();
+        }
+    }
+
+    pub fn note_off(&mut self) {
+        for op in &mut self.operators {
+            op.env_gen.close();
         }
     }
 }
@@ -104,7 +118,7 @@ struct Route {
 
 type Algorithm = [Route ; 4];
 
-const ALGORITHMS : [Algorithm; 2] = 
+const ALGORITHMS : [Algorithm; 3] = 
 [
     // [1]-[2]-[3]-[4]->
     [ 
@@ -121,5 +135,18 @@ const ALGORITHMS : [Algorithm; 2] =
         Route { mod_source : Register::Output, out_sink : Register::Output }, 
         Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
         Route { mod_source : Register::Output, out_sink : Register::Adder  }
-    ]
+    ],
+    // [1]-.
+    //     |
+    // [2]-+
+    //     |
+    // [3]-+
+    //     |
+    // [4]-+->
+    [
+        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null, out_sink : Register::Adder }
+    ],
 ];

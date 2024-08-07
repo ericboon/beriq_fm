@@ -2,7 +2,7 @@ use std::f32::MIN;
 
 use crate::fp::*;
 
-const CLOCK_DIVIDER : u8 = 1; // update env every 4 samples (12kHz)
+const CLOCK_DIVIDER : u8 = 64; // update env every 4 samples (12kHz)
 
 const INDEX_OFFSET : FP = FP { repr : 12625 }; // log2(8/7) + delta
 const OFFSET_UP : FP    = FP { repr : 74898 }; // 8/7
@@ -28,7 +28,7 @@ pub struct EnvGenerator {
 
     clock : u8,
     index : FP,
-    level : FP,
+    pub level : FP,
     state : EnvState
 }
 

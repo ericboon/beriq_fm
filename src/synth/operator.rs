@@ -49,7 +49,7 @@ impl Operator {
                 wave_sample * env_level * FP::from(self.total_level) >> 8
             };
 
-        self.feedback = output * FP::from(self.feedback_level) >> 8;
+        self.feedback = (output * FP::from(self.feedback_level)) >> 8;
 
         return output;
     }
