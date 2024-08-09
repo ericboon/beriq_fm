@@ -4,6 +4,7 @@
 
 use crate::fp::*;
 
+#[derive(Debug, Copy, Clone)]
 pub enum WaveForm {
 	FullSine,
 	HalfSine,
@@ -15,6 +16,7 @@ pub enum WaveForm {
 	Square
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct WaveGenerator {
 	pub waveform : WaveForm
 }

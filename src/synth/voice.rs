@@ -6,6 +6,7 @@ use crate::fp::*;
 
 use super::operator::*;
 
+#[derive(Debug, Copy, Clone)]
 pub struct Voice {
     pub operators : [ Operator; 4 ],
     pub algorithm : usize,
@@ -43,9 +44,10 @@ impl Voice {
                     Register::Output => self.output,
                     Register::Adder => self.adder
                 };
+            let sample = op.get_sample();
             match algo[i].out_sink {
-                Register::Output => self.output = op.get_sample(),
-                Register::Adder  => self.adder = self.adder + op.get_sample(),
+                Register::Output => self.output = sample,
+                Register::Adder  => self.adder = self.adder + sample,
                 Register::Null => ()
             };
         }
@@ -118,7 +120,7 @@ struct Route {
 
 type Algorithm = [Route ; 4];
 
-const ALGORITHMS : [Algorithm; 3] = 
+const ALGORITHMS : [Algorithm; 8] = 
 [
     // [1]-[2]-[3]-[4]->
     [ 
@@ -127,26 +129,82 @@ const ALGORITHMS : [Algorithm; 3] =
         Route { mod_source : Register::Output, out_sink : Register::Output }, 
         Route { mod_source : Register::Output, out_sink : Register::Output }
     ], 
-    //         .-[3]-.
-    //         |     |
-    // [1]-[2]-+-[4]-+->
+
+    // [1]-.
+    //     |
+    // [2]-+-[3]-[4]->
     [
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Adder,  out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Output }
+    ],
+
+    //     [1]-.
+    //         |
+    // [2]-[3]-+-[4]->
+    [
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Adder,  out_sink : Register::Output }
+    ],
+
+    //         [1]-.
+    //             |
+    // [2]-[3]-[4]-+->
+    [
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }, 
         Route { mod_source : Register::Null,   out_sink : Register::Output }, 
         Route { mod_source : Register::Output, out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }
+    ],
+
+    // [1]-[2]-.
+    //         |
+    // [3]-[4]-+->
+    [
+        Route { mod_source : Register::Null,   out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }
+    ],
+
+    //     .-[2]-.
+    //     |     |
+    // [1]-+-[3]-+->
+    //     |     |
+    //     `-[4]-´
+    [
+        Route { mod_source : Register::Null,   out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
         Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
         Route { mod_source : Register::Output, out_sink : Register::Adder  }
     ],
+
+    // [1]-----.
+    //         |
+    // [2]-[3]-+->
+    //         |
+    // [4]-----´
+[
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Output }, 
+        Route { mod_source : Register::Output, out_sink : Register::Adder  }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Adder  }
+    ],
+
     // [1]-.
     //     |
     // [2]-+
     //     |
-    // [3]-+
+    // [3]-+->
     //     |
-    // [4]-+->
+    // [4]-´
     [
-        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
-        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
-        Route { mod_source : Register::Null, out_sink : Register::Adder }, 
-        Route { mod_source : Register::Null, out_sink : Register::Adder }
+        Route { mod_source : Register::Null,   out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Adder }, 
+        Route { mod_source : Register::Null,   out_sink : Register::Adder }
     ],
 ];

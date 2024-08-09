@@ -10,6 +10,7 @@ use super::phase_generator::*;
 use super::wave_generator::*;
 use super::env_generator::*;
 
+#[derive(Debug, Copy, Clone)]
 pub struct Operator {
     pub phase_gen : PhaseGenerator,
     pub wave_gen  : WaveGenerator,

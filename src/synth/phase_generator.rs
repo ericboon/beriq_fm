@@ -1,6 +1,7 @@
 use crate::fp::*;
 use crate::synth::LOG2_SF;
 
+#[derive(Debug, Copy, Clone)]
 pub struct PhaseGenerator {
     pub phase: FP,
     pub flog2: FP,

@@ -1,8 +1,6 @@
-use std::f32::MIN;
-
 use crate::fp::*;
 
-const CLOCK_DIVIDER : u8 = 64; // update env every 4 samples (12kHz)
+const CLOCK_DIVIDER : u8 = 24; // update env every 24 samples (2kHz)
 
 const INDEX_OFFSET : FP = FP { repr : 12625 }; // log2(8/7) + delta
 const OFFSET_UP : FP    = FP { repr : 74898 }; // 8/7
